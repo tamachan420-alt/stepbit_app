@@ -3,256 +3,266 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Stepbit タブ版マイページ 完全版</title>
+<title>Stepbit 完全版</title>
 <style>
-body { font-family:"Helvetica Neue", Arial, sans-serif; margin:20px; }
-nav button { margin:4px; padding:6px 12px; }
-nav button.active { background:#FF6B6B;color:#fff; }
-.chip { display:inline-block;padding:4px 8px;margin:2px;border:1px solid #ccc;border-radius:12px;cursor:pointer; }
-.chip.selected { background:#FF6B6B;color:#fff; }
-.mood-btn { margin:2px;padding:6px 12px;border:1px solid #ccc;cursor:pointer; }
-.mood-btn.active { background:#FF6B6B;color:#fff; }
-.card { padding:10px;border:1px solid #ddd;border-radius:8px;margin-top:10px; position:relative; }
-.small { padding:4px 8px; cursor:pointer; border-radius:6px; margin-top:5px; }
-textarea { width:100%; margin-top:5px; }
-.achieve-btn { margin:2px; padding:4px 8px; cursor:pointer; border-radius:6px; border:1px solid #ccc; }
-.achieve-btn.selected { background:#FF6B6B;color:#fff; border-color:#FF6B6B; }
-
-/* ジャーナルコメント */
+body { font-family:"Helvetica Neue", Arial, sans-serif; margin:20px; background:#fafafa;}
+.card { background:#fff; padding:16px; border-radius:12px; box-shadow:0 2px 5px rgba(0,0,0,0.1); margin-bottom:20px; }
+button { padding:8px 14px; border:none; border-radius:6px; cursor:pointer; }
+button.primary { background:#FF6B6B; color:#fff; }
+button.secondary { background:#ccc; color:#333; }
+input, select, textarea { width:100%; padding:8px; margin:6px 0; border:1px solid #ccc; border-radius:6px; }
+.chip { display:inline-block; padding:6px 10px; margin:4px; border:1px solid #ccc; border-radius:12px; cursor:pointer; }
+.chip.selected { background:#FF6B6B; color:#fff; }
+.hidden { display:none; }
+.mood-btn { margin:4px; padding:8px 14px; border:1px solid #ccc; border-radius:6px; cursor:pointer; }
+.mood-btn.active { background:#FF6B6B; color:#fff; }
+.tabs { display:flex; margin-bottom:10px; }
+.tab { flex:1; padding:8px; text-align:center; border-bottom:2px solid #ccc; cursor:pointer; }
+.tab.active { border-bottom:3px solid #FF6B6B; font-weight:bold; color:#FF6B6B; }
 #journalComment { padding:10px; border-radius:6px; height:100px; color:#fff; display:flex; align-items:center; justify-content:center; text-align:center; }
-
-/* タブ */
-.tab-buttons { margin-bottom:10px; }
-.tab-buttons button { margin-right:4px; padding:4px 10px; cursor:pointer; border-radius:6px; border:1px solid #ccc; }
-.tab-buttons button.active { background:#FF6B6B;color:#fff; border-color:#FF6B6B; }
-.tab-content { display:none; }
-.tab-content.active { display:block; }
 </style>
 </head>
 <body>
 
-<nav>
-  <button id="nav-mypage">マイページ</button>
-</nav>
+<!-- 🧭 初期設定 -->
+<div id="onboarding" class="card">
+  <h2>初期プロフィール設定</h2>
+  <label>名前</label>
+  <input id="name" placeholder="例: 山田 太郎">
 
-<!-- 初回設定 -->
-<div id="onboarding" style="display:none" class="card">
-  <h3>プロフィール登録（初回のみ）</h3>
-  <input id="name" placeholder="名前"><br>
-  <input id="gender" placeholder="性別"><br>
-  <input id="age" placeholder="年齢"><br>
+  <label>性別</label>
+  <select id="gender">
+    <option value="">選択してください</option>
+    <option value="男性">男性</option>
+    <option value="女性">女性</option>
+    <option value="その他">その他</option>
+  </select>
+
+  <label>年齢</label>
+  <input id="age" type="number" min="0" placeholder="例: 25">
+
+  <label>性格タイプ</label>
   <div class="chips">
     <span class="chip" data-val="追い込み型">追い込み型</span>
     <span class="chip" data-val="計画型">計画型</span>
     <span class="chip" data-val="マイペース型">マイペース型</span>
   </div>
-  <input id="goalTitle" placeholder="目標"><br>
-  <button id="saveOnboard">保存して次へ</button>
+
+  <label>目標</label>
+  <input id="goalTitle" placeholder="例: 英会話・筋トレ・読書など">
+
+  <button id="saveOnboard" class="primary">保存して次へ</button>
 </div>
 
-<!-- 今日の気分 -->
-<div id="moodSelect" style="display:none" class="card">
-  <h3>今日の気分を選択してください</h3>
+<!-- 😌 今日の気分 -->
+<div id="moodSelect" class="card hidden">
+  <h2>今日の気分を選択してください</h2>
   <div id="moodBtns">
-    <button class="mood-btn" data-level="5">元気</button>
-    <button class="mood-btn" data-level="4">やや元気</button>
-    <button class="mood-btn" data-level="3">普通</button>
-    <button class="mood-btn" data-level="2">少し疲れてる</button>
-    <button class="mood-btn" data-level="1">今日は休む</button>
+    <button class="mood-btn" data-level="5">元気 💪</button>
+    <button class="mood-btn" data-level="4">やや元気 🙂</button>
+    <button class="mood-btn" data-level="3">普通 😐</button>
+    <button class="mood-btn" data-level="2">少し疲れた 😴</button>
+    <button class="mood-btn" data-level="1">今日は休む 💤</button>
   </div>
-  <button id="confirmMood" style="margin-top:10px;">チャレンジを表示</button>
+  <button id="confirmMood" class="primary">チャレンジを見る</button>
 </div>
 
-<!-- 今日のチャレンジ -->
-<div id="challenge" style="display:none" class="card">
-  <h3>今日のチャレンジ</h3>
-  <div id="challengeText">チャレンジがここに表示されます</div>
-  <div id="achieveBtns" style="margin-top:5px;">
-    <button class="achieve-btn" data-val="やった">やった ✅</button>
-    <button class="achieve-btn" data-val="ややできた">ややできた ⚡</button>
-    <button class="achieve-btn" data-val="できなかった">できなかった ❌</button>
-  </div>
+<!-- 💡 今日のチャレンジ -->
+<div id="challenge" class="card hidden">
+  <h2>今日のチャレンジ</h2>
+  <p id="challengeText"></p>
+  <button class="secondary" id="btnDid">やった ✅</button>
+  <button class="secondary" id="btnHalf">ややできた ⚡</button>
+  <button class="secondary" id="btnFail">できなかった ❌</button>
 </div>
 
-<!-- 今日の一歩ジャーナル -->
-<div id="journal" style="display:none" class="card">
-  <h3>今日の一歩ジャーナル</h3>
+<!-- ✏️ ジャーナル -->
+<div id="journal" class="card hidden">
+  <h2>今日の一歩ジャーナル</h2>
   <div style="display:flex; gap:10px;">
-    <textarea id="journalAchievement" rows="4" placeholder="今日の達成や感想を書きましょう" style="flex:1;"></textarea>
+    <textarea id="journalText" rows="4" placeholder="今日の感想・気づきを書きましょう" style="flex:1;"></textarea>
     <div id="journalComment" style="flex:0 0 200px; border:1px solid #ccc;"></div>
   </div>
-  <button id="saveJournal" style="margin-top:10px;">保存</button>
+  <button id="saveJournal" class="primary">保存</button>
 </div>
 
-<!-- マイページ -->
-<div id="mypage" style="display:none">
-  <h3>マイページ</h3>
-  <div class="tab-buttons">
-    <button data-tab="profileTab" class="active">プロフィール情報</button>
-    <button data-tab="achievementTab">達成状況</button>
+<!-- 👤 マイページ -->
+<div id="mypage" class="card hidden">
+  <div class="tabs">
+    <div class="tab active" id="tabProfile">プロフィール情報</div>
+    <div class="tab" id="tabProgress">達成状況</div>
+    <div class="tab" id="tabJournal">ジャーナル履歴</div>
   </div>
-  <div id="profileTab" class="tab-content active card"></div>
-  <div id="achievementTab" class="tab-content card"></div>
+
+  <!-- プロフィール情報 -->
+  <div id="profileSection">
+    <h3>プロフィール情報</h3>
+    <div id="profileInfo"></div>
+    <button id="resetProfile" class="secondary">プロフィールをリセット</button>
+  </div>
+
+  <!-- 達成状況 -->
+  <div id="progressSection" class="hidden">
+    <h3>達成状況</h3>
+    <ul id="historyList"></ul>
+  </div>
+
+  <!-- ジャーナル履歴 -->
+  <div id="journalSection" class="hidden">
+    <h3>過去のジャーナル</h3>
+    <ul id="journalList"></ul>
+  </div>
 </div>
 
 <script>
-// ----- 初期設定 -----
-const sections = ['onboarding','moodSelect','challenge','journal','mypage'];
 let selectedMood = null;
 let selectedAchieve = null;
 
-function showSection(id){
-  sections.forEach(s=>document.getElementById(s).style.display=(s===id)?'block':'none');
-}
-
-// チップ選択
-document.querySelectorAll('.chips .chip').forEach(c=>{
+// 🧩 チップ選択
+document.querySelectorAll('.chip').forEach(c=>{
   c.addEventListener('click', ()=>{
-    document.querySelectorAll('.chips .chip').forEach(x=>x.classList.remove('selected'));
+    document.querySelectorAll('.chip').forEach(x=>x.classList.remove('selected'));
     c.classList.add('selected');
   });
 });
 
-// 初回チェック
-window.addEventListener('DOMContentLoaded',()=>{
-  const savedProfile = localStorage.getItem('stepbit_profile');
-  if(!savedProfile) showSection('onboarding');
-  else showSection('moodSelect');
-  renderProfile();
-  renderAchievement();
-});
-
-// プロフィール保存
+// 🧩 保存ボタン（初期設定）
 document.getElementById('saveOnboard').addEventListener('click',()=>{
   const profile = {
     name: document.getElementById('name').value,
     gender: document.getElementById('gender').value,
     age: document.getElementById('age').value,
-    personality: Array.from(document.querySelectorAll('.chips .chip.selected')).map(c=>c.dataset.val),
+    personality: Array.from(document.querySelectorAll('.chip.selected')).map(c=>c.dataset.val)[0] || "",
     goal: document.getElementById('goalTitle').value
   };
-  if(!profile.name||!profile.goal){alert('名前と目標は必須'); return;}
-  localStorage.setItem('stepbit_profile',JSON.stringify(profile));
-  showSection('moodSelect');
-  renderProfile();
+  if(!profile.name || !profile.goal){ alert("名前と目標は必須です"); return; }
+  localStorage.setItem('stepbit_profile', JSON.stringify(profile));
+  document.getElementById('onboarding').classList.add('hidden');
+  document.getElementById('moodSelect').classList.remove('hidden');
 });
 
-// 気分選択
-document.querySelectorAll('#moodBtns .mood-btn').forEach(btn=>{
+// 😌 気分選択
+document.querySelectorAll('.mood-btn').forEach(btn=>{
   btn.addEventListener('click', ()=>{
-    document.querySelectorAll('#moodBtns .mood-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
     selectedMood = parseInt(btn.dataset.level);
   });
 });
+
 document.getElementById('confirmMood').addEventListener('click',()=>{
-  if(!selectedMood){ alert('気分を選択してください'); return; }
-  document.getElementById('challengeText').innerText = suggestChallenge();
-  showSection('challenge');
+  if(!selectedMood){ alert("気分を選択してください"); return; }
+  document.getElementById('challengeText').textContent = suggestChallenge();
+  document.getElementById('moodSelect').classList.add('hidden');
+  document.getElementById('challenge').classList.remove('hidden');
 });
 
-// AIチャレンジ提案
+// 💡 チャレンジ提案
 function suggestChallenge(){
-  const profile = JSON.parse(localStorage.getItem('stepbit_profile')||'{}');
-  const personality = profile.personality?.[0] || "マイペース型";
-  const history = JSON.parse(localStorage.getItem('stepbit_history')||'[]');
-  const last3 = history.slice(-3);
-  const failCount = last3.filter(h=>h.achieve==="できなかった").length;
+  const p = JSON.parse(localStorage.getItem('stepbit_profile'));
+  const goal = p.goal || "目標";
+  const type = p.personality || "マイペース型";
 
-  if(selectedMood<=2) return "今日は無理せず休む";
-  if(personality==="追い込み型"){ if(selectedMood>=4) return "友達とオンラインで英会話チャレンジ"; if(selectedMood===3) return "英会話フレーズ5つ挑戦"; }
-  if(personality==="計画型"){ if(selectedMood>=4){ return failCount===0?"英会話フレーズ3つ挑戦":"軽めに調整"; } if(selectedMood===3) return "読書や散歩でリラックス"; }
-  if(personality==="マイペース型"){ if(selectedMood>=4) return "英会話フレーズ3つ挑戦"; if(selectedMood===3) return "散歩やストレッチでリラックス"; }
-  return "軽くストレッチして休む";
-}
-
-// 達成度選択＆ジャーナルコメント表示
-document.querySelectorAll('#achieveBtns .achieve-btn').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    document.querySelectorAll('#achieveBtns .achieve-btn').forEach(b=>b.classList.remove('selected'));
-    btn.classList.add('selected');
-    selectedAchieve = btn.dataset.val;
-    const stepText = document.getElementById('challengeText').innerText;
-    const history = JSON.parse(localStorage.getItem('stepbit_history')||'[]');
-    history.push({step:stepText,date:new Date().toISOString(),achieve:selectedAchieve});
-    localStorage.setItem('stepbit_history',JSON.stringify(history));
-
-    // ジャーナル横コメント
-    const journalComment = document.getElementById('journalComment');
-    if(selectedAchieve==="やった"){ journalComment.textContent="おめでとう！よくできました🎉"; journalComment.style.background="#28a745"; }
-    else if(selectedAchieve==="ややできた"){ journalComment.textContent="いい感じ！少しずつ慣れていこう✨"; journalComment.style.background="#ffc107"; journalComment.style.color="#000"; }
-    else{ journalComment.textContent="大丈夫！次はできる！💪"; journalComment.style.background="#dc3545"; }
-
-    document.getElementById('journalAchievement').value = `${stepText} - ${selectedAchieve}`;
-    showSection('journal');
-  });
-});
-
-// ジャーナル保存（マイページ遷移）
-document.getElementById('saveJournal').addEventListener('click',()=>{
-  showSection('mypage');
-  renderProfile();
-  renderAchievement();
-});
-
-// ----- マイページタブ -----
-document.querySelectorAll('.tab-buttons button').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    document.querySelectorAll('.tab-buttons button').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
-    document.getElementById(btn.dataset.tab).classList.add('active');
-  });
-});
-
-// ----- マイページ表示 -----
-function renderProfile(){
-  const container = document.getElementById('profileTab');
-  const data = JSON.parse(localStorage.getItem('stepbit_profile')||'{}');
-  container.innerHTML=`
-    <h4>プロフィール情報</h4>
-    <p>名前: ${data.name||''}</p>
-    <p>性別: ${data.gender||''}</p>
-    <p>年齢: ${data.age||''}</p>
-    <p>性格: ${data.personality?.[0]||''}</p>
-    <p>目標: ${data.goal||''}</p>
-  `;
-}
-
-function renderAchievement(){
-  const container = document.getElementById('achievementTab');
-  const history = JSON.parse(localStorage.getItem('stepbit_history')||'[]');
-  container.innerHTML=`
-    <h4>達成状況</h4>
-    <p>連続達成日数: <span id="streak">0</span>日</p>
-    <ul id="historyList"></ul>
-  `;
-  const list = container.querySelector('#historyList');
-  if(history.length===0) list.innerHTML='<li>まだ履歴はありません</li>';
-  else history.forEach(h=>{
-    const li = document.createElement('li');
-    const d = new Date(h.date);
-    li.textContent = `${d.toLocaleDateString()} ${d.toLocaleTimeString()} - ${h.step} (${h.achieve})`;
-    list.appendChild(li);
-  });
-
-  const today = new Date();
-  let streak = 0;
-  const sorted = history.slice().sort((a,b)=>new Date(b.date)-new Date(a.date));
-  for(let i=0;i<sorted.length;i++){
-    const d = new Date(sorted[i].date);
-    const diffDays = Math.floor((today-d)/(1000*60*60*24));
-    if(diffDays===streak) streak++; else break;
+  if(selectedMood <= 2) return `今日は休息日。${goal}のことを考える時間にしよう。`;
+  if(goal.includes("英会話")){
+    if(type==="追い込み型" && selectedMood>=4) return "英会話フレーズを10個練習してみよう！";
+    if(type==="計画型") return "英会話アプリで5分リスニング練習。";
+    return "英語日記を1文だけ書いてみよう！";
   }
-  container.querySelector('#streak').innerText = streak;
+  if(goal.includes("筋トレ")){
+    if(selectedMood>=4) return "腕立て20回・スクワット30回に挑戦！";
+    if(selectedMood===3) return "ストレッチ＋軽いスクワット5回！";
+    return "深呼吸して体を休めよう。";
+  }
+  if(goal.includes("読書")){
+    if(selectedMood>=4) return "本を10ページ読んで要約してみよう。";
+    return "1ページでもOK！継続が大事📖";
+  }
+  return `${goal}に向けて、少しでも前進してみよう！`;
 }
 
-// マイページボタン
-document.getElementById('nav-mypage').addEventListener('click', ()=>{
-  showSection('mypage');
-  renderProfile();
-  renderAchievement();
+// 💪 チャレンジ結果
+["btnDid","btnHalf","btnFail"].forEach(id=>{
+  document.getElementById(id).addEventListener('click',()=>{
+    if(id==="btnDid") selectedAchieve="やった";
+    if(id==="btnHalf") selectedAchieve="ややできた";
+    if(id==="btnFail") selectedAchieve="できなかった";
+
+    const comment = document.getElementById('journalComment');
+    if(selectedAchieve==="やった"){ comment.textContent="最高！よく頑張ったね🎉"; comment.style.background="#28a745"; }
+    else if(selectedAchieve==="ややできた"){ comment.textContent="ナイスチャレンジ✨"; comment.style.background="#ffc107"; comment.style.color="#000"; }
+    else{ comment.textContent="大丈夫！明日また一歩💪"; comment.style.background="#dc3545"; }
+
+    document.getElementById('challenge').classList.add('hidden');
+    document.getElementById('journal').classList.remove('hidden');
+  });
 });
+
+// ✏️ ジャーナル保存 → マイページへ
+document.getElementById('saveJournal').addEventListener('click',()=>{
+  const history = JSON.parse(localStorage.getItem('stepbit_history')||'[]');
+  const entry = {
+    date: new Date().toLocaleString(),
+    mood: selectedMood,
+    achieve: selectedAchieve,
+    text: document.getElementById('journalText').value
+  };
+  history.push(entry);
+  localStorage.setItem('stepbit_history', JSON.stringify(history));
+  document.getElementById('journal').classList.add('hidden');
+  showMyPage();
+});
+
+// 👤 マイページ表示
+function showMyPage(){
+  const data = JSON.parse(localStorage.getItem('stepbit_profile'));
+  const history = JSON.parse(localStorage.getItem('stepbit_history')||'[]');
+
+  document.getElementById('profileInfo').innerHTML = `
+    <p><strong>名前：</strong>${data.name}</p>
+    <p><strong>性別：</strong>${data.gender||"未設定"}</p>
+    <p><strong>年齢：</strong>${data.age||"未設定"}</p>
+    <p><strong>性格タイプ：</strong>${data.personality||"未設定"}</p>
+    <p><strong>目標：</strong>${data.goal}</p>
+  `;
+  document.getElementById('historyList').innerHTML = history.length===0 ? "<li>まだ履歴はありません。</li>" :
+    history.map(h=>`<li>${h.date}｜${h.achieve}</li>`).join("");
+
+  document.getElementById('journalList').innerHTML = history.length===0 ? "<li>まだジャーナルはありません。</li>" :
+    history.map(h=>`<li><strong>${h.date}</strong><br>気分:${h.mood}｜結果:${h.achieve}<br>${h.text}</li>`).join("");
+
+  document.getElementById('mypage').classList.remove('hidden');
+}
+
+// 🔁 リセット
+document.getElementById('resetProfile').addEventListener('click',()=>{
+  if(confirm("プロフィールをリセットして最初からやり直しますか？")){
+    localStorage.clear();
+    document.getElementById('mypage').classList.add('hidden');
+    document.getElementById('onboarding').classList.remove('hidden');
+  }
+});
+
+// 🗂️ タブ切り替え
+const tabs = ["Profile","Progress","Journal"];
+tabs.forEach(t=>{
+  document.getElementById("tab"+t).addEventListener('click',()=>{
+    tabs.forEach(x=>{
+      document.getElementById("tab"+x).classList.remove('active');
+      document.getElementById(x.toLowerCase()+"Section").classList.add('hidden');
+    });
+    document.getElementById("tab"+t).classList.add('active');
+    document.getElementById(t.toLowerCase()+"Section").classList.remove('hidden');
+  });
+});
+
+// 🚀 起動時
+window.onload = ()=>{
+  if(localStorage.getItem('stepbit_profile')){
+    document.getElementById('onboarding').classList.add('hidden');
+    document.getElementById('moodSelect').classList.remove('hidden');
+  }
+};
 </script>
 </body>
 </html>
