@@ -1,0 +1,22 @@
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS challenges;
+DROP TABLE IF EXISTS logs;
+
+CREATE TABLE users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL
+);
+
+CREATE TABLE challenges (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  title TEXT NOT NULL,
+  date TEXT,
+  status TEXT DEFAULT 'incomplete'
+);
+
+CREATE TABLE logs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  challenge_id INTEGER NOT NULL,
+  progress TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
