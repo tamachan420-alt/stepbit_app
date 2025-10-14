@@ -1,0 +1,11 @@
+# 仮想環境や不要ファイルを除外
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.db-journal
+.env
+.DS_Store
+
+# SQLiteデータベース（必要に応じて）
+backend/db/stepbit_db.sqlite
