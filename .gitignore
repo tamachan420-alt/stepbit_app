@@ -4,7 +4,11 @@ __pycache__/
 *.pyc
 *.pyo
 *.db-journal
+
+# 環境変数ファイル
 .env
+
+# macOSの不要ファイル
 .DS_Store
 
 # SQLiteデータベース（必要に応じて）
