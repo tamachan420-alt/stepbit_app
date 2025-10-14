@@ -1,32 +1,33 @@
-from flask import Blueprint, request, jsonify
-from openai import OpenAI
-from backend.config import Config
+from flask import Blueprint, request, jsonify, current_app, Response
+import json
 
 bp = Blueprint('comment', __name__, url_prefix='/api')
-client = OpenAI(api_key=Config.OPENAI_API_KEY)
 
 @bp.route('/comment', methods=['POST'])
 def comment():
     data = request.get_json()
 
-    # ユーザー情報
+    # --- ユーザー情報 ---
     name = data.get("name", "あなた")
     gender = data.get("gender", "")
     age = data.get("age", "")
     type_name = data.get("type", "")
     goal = data.get("goal", "")
     mood = data.get("mood", "")
-    result = data.get("result", "")  # ← 実施結果（やった・ややできた・できなかった）
+    result = data.get("result", "")
     dialect = data.get("dialect", "standard")  # ← 方言モード
 
-    # 方言設定
-    if dialect == "ehime":
+    # --- 方言設定 ---
+    if dialect in ["imabari", "ehime"]:
         style = "伊予弁で、あたたかく励ます感じで話してください。"
-    elif dialect == "osaka":
+    elif dialect in ["matsuyama"]:
+        style = "松山弁で、やさしくフレンドリーに話してください。"
+    elif dialect in ["kansai", "osaka"]:
         style = "関西弁で、フレンドリーにツッコミ混じりでコメントしてください。"
     else:
         style = "標準語で、優しく励ます感じで話してください。"
 
+    # --- プロンプト生成 ---
     prompt = f"""
     ユーザー情報:
     - 名前: {name}
@@ -46,14 +47,27 @@ def comment():
     """
 
     try:
-        response = client.chat.completions.create(
+        # ✅ Flaskアプリに登録済みのOpenAIクライアントを取得
+        client = current_app.client
+
+        # ✅ GPT-4oの新API（responses）を使用
+        response = client.responses.create(
             model="gpt-4o-mini",
-            messages=[
+            input=[
                 {"role": "system", "content": "あなたは利用者を優しく励ますコーチAIです。"},
                 {"role": "user", "content": prompt}
             ]
         )
-        comment_text = response.choices[0].message.content.strip()
-        return jsonify({"comment": comment_text})
+
+        comment_text = response.output[0].content[0].text.strip()
+        
+        return Response(
+            json.dumps({"comment": comment_text}, ensure_ascii=False),
+            mimetype='application/json'
+        )
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@bp.route('/ping', methods=['GET'])
+def ping():
+    return jsonify({"message": "API is alive!"})

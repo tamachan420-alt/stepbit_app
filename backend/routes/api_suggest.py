@@ -1,13 +1,13 @@
-from flask import Blueprint, request, jsonify
-from openai import OpenAI
+from flask import Blueprint, request, jsonify, current_app, Response
+import json
 from backend.config import Config
 
 bp = Blueprint('suggest', __name__, url_prefix='/api')
-client = OpenAI(api_key=Config.OPENAI_API_KEY)
 
 @bp.route('/suggest', methods=['POST'])
 def suggest():
     data = request.get_json()
+
     name = data.get("name", "あなた")
     gender = data.get("gender", "")
     age = data.get("age", "")
@@ -30,14 +30,22 @@ def suggest():
     """
 
     try:
-        response = client.chat.completions.create(
+        client = current_app.client
+        response = client.responses.create(
             model="gpt-4o-mini",
-            messages=[
+            input=[
                 {"role": "system", "content": "あなたは生活改善を支援するコーチAIです。"},
                 {"role": "user", "content": prompt}
             ]
         )
-        suggestion = response.choices[0].message.content.strip()
-        return jsonify({"suggestion": suggestion})
+
+        suggestion = response.output[0].content[0].text.strip()
+
+        # ✅ jsonify → Response(json.dumps(..., ensure_ascii=False)) に変更
+        return Response(
+            json.dumps({"suggestion": suggestion}, ensure_ascii=False),
+            mimetype='application/json'
+        )
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
