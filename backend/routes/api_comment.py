@@ -15,7 +15,8 @@ def comment():
     goal = data.get("goal", "")
     mood = data.get("mood", "")
     result = data.get("result", "")
-    dialect = data.get("dialect", "standard")  # ← 方言モード
+    import os
+    dialect = data.get("dialect") or os.getenv("DIALECT", "standard") # ← 方言モード
 
     # --- 方言設定 ---
     if dialect in ["imabari", "ehime"]:
@@ -47,10 +48,7 @@ def comment():
     """
 
     try:
-        # ✅ Flaskアプリに登録済みのOpenAIクライアントを取得
         client = current_app.client
-
-        # ✅ GPT-4oの新API（responses）を使用
         response = client.responses.create(
             model="gpt-4o-mini",
             input=[
@@ -60,14 +58,24 @@ def comment():
         )
 
         comment_text = response.output[0].content[0].text.strip()
-        
+
+        # ✅ 統一レスポンス形式
         return Response(
-            json.dumps({"comment": comment_text}, ensure_ascii=False),
+            json.dumps({"ok": True, "text": comment_text}, ensure_ascii=False),
             mimetype='application/json'
         )
+
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"ok": False, "error": str(e)}), 500
+
 
 @bp.route('/ping', methods=['GET'])
 def ping():
     return jsonify({"message": "API is alive!"})
+
+# ✅ 現在の方言設定を確認するためのエンドポイント
+@bp.route('/dialect', methods=['GET'])
+def get_dialect():
+    import os
+    return jsonify({"dialect": os.getenv("DIALECT", "standard")})
+

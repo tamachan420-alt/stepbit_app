@@ -28,14 +28,26 @@ def create_app():
     app.register_blueprint(comment_bp)
     app.register_blueprint(logs_bp)
 
+    # ✅ ルーティング設定
     @app.route('/')
     def index():
+        return render_template('index.html')
+
+    @app.route('/stepbit')
+    def stepbit():
         return render_template('stepbit.html')
 
     return app
 
 
+# ✅ ★ここに追記！ create_app() の後、if __name__ == '__main__' の前
+app = create_app()
+
+with app.app_context():
+    from backend.models import db
+    db.create_all()
+    print("✅ データベース初期化チェック完了")
+
 if __name__ == '__main__':
-    app = create_app()
-    print("🔑 OpenAI API KEY (masked):", str(app.config["OPENAI_API_KEY"])[:10] + "******")  # ✅ ここに移動
+    print("🔑 OpenAI API KEY (masked):", str(app.config["OPENAI_API_KEY"])[:10] + "******")
     app.run(debug=True)

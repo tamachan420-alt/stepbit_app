@@ -13,10 +13,7 @@ class Config:
     FLASK_ENV = os.getenv("FLASK_ENV", "development")
 
     # データベース設定（絶対パス指定に変更）
-    SQLALCHEMY_DATABASE_URI = os.getenv(
-        "DATABASE_URL",
-        f"sqlite:///{os.path.join(BASE_DIR, 'db', 'stepbit_db.sqlite')}"
-    )
+    SQLALCHEMY_DATABASE_URI = "sqlite:////Users/tamaiatsushi/Desktop/stepbit_app/backend/db/stepbit_db.sqlite"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # OpenAI APIキー
