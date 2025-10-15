@@ -3,33 +3,52 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Stepbit 完全版</title>
+<title>Stepbit PC版 成長版 完全版</title>
 <style>
-body { font-family:"Helvetica Neue", Arial, sans-serif; margin:20px; background:#fafafa;}
-.card { background:#fff; padding:16px; border-radius:12px; box-shadow:0 2px 5px rgba(0,0,0,0.1); margin-bottom:20px; }
-button { padding:8px 14px; border:none; border-radius:6px; cursor:pointer; }
+html, body { height:100%; margin:0; font-family:"Helvetica Neue", Arial, sans-serif; background:#e0f0ff; display:flex; justify-content:center; align-items:flex-start; padding:20px;}
+.card { background:#fff; padding:24px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.1); margin:20px auto; width:800px; max-width:95%; box-sizing:border-box; }
+button { padding:10px 18px; border:none; border-radius:6px; cursor:pointer; font-size:16px; }
 button.primary { background:#FF6B6B; color:#fff; }
 button.secondary { background:#ccc; color:#333; }
-input, select, textarea { width:100%; padding:8px; margin:6px 0; border:1px solid #ccc; border-radius:6px; }
-.chip { display:inline-block; padding:6px 10px; margin:4px; border:1px solid #ccc; border-radius:12px; cursor:pointer; }
+input, select, textarea { width:100%; padding:10px; margin:8px 0; border:1px solid #ccc; border-radius:6px; font-size:16px; }
+.chip { display:inline-block; padding:8px 14px; margin:4px; border:1px solid #ccc; border-radius:20px; cursor:pointer; font-size:14px; }
 .chip.selected { background:#FF6B6B; color:#fff; }
 .hidden { display:none; }
-.mood-btn { margin:4px; padding:8px 14px; border:1px solid #ccc; border-radius:6px; cursor:pointer; }
+.mood-btn { margin:6px; padding:10px 16px; border:1px solid #ccc; border-radius:6px; cursor:pointer; font-size:16px; }
 .mood-btn.active { background:#FF6B6B; color:#fff; }
 .tabs { display:flex; margin-bottom:10px; }
-.tab { flex:1; padding:8px; text-align:center; border-bottom:2px solid #ccc; cursor:pointer; }
+.tab { flex:1; padding:10px; text-align:center; border-bottom:2px solid #ccc; cursor:pointer; font-size:16px; }
 .tab.active { border-bottom:3px solid #FF6B6B; font-weight:bold; color:#FF6B6B; }
-#journalComment { padding:10px; border-radius:6px; height:100px; color:#fff; display:flex; align-items:center; justify-content:center; text-align:center; }
+#journalComment { padding:12px; border-radius:6px; height:120px; color:#fff; display:flex; align-items:center; justify-content:center; text-align:center; font-size:16px; }
+.progress-bar { width:100%; height:24px; background:#eee; border-radius:12px; margin-top:10px; overflow:hidden; }
+.progress-fill { height:100%; background:#FF6B6B; width:0%; border-radius:12px; transition:width 0.5s ease; }
+.tree { text-align:center; font-size:64px; transition:transform 0.3s ease; transform-origin: bottom center; margin-top:20px; display:inline-block; }
+.level-text { text-align:center; font-weight:bold; margin-top:8px; font-size:20px; }
+.streak { text-align:center; margin-top:10px; font-size:16px; color:#555; }
+.journal-card { border-radius:10px; padding:14px 18px; margin-bottom:10px; color:#fff; box-shadow:0 1px 4px rgba(0,0,0,0.15); font-size:16px; }
+.journal-card strong { display:block; font-size:14px; margin-bottom:6px; opacity:0.9; }
+.journal-card p { margin:4px 0; white-space:pre-wrap; }
+.journal-card .result { font-weight:bold; font-size:16px; }
+.journal-card[data-type="やった"] { background:#4CAF50; }
+.journal-card[data-type="ややできた"] { background:#FFC107; color:#222; }
+.journal-card[data-type="できなかった"] { background:#E57373; }
+.empty-journal { text-align:center; color:#666; margin-top:10px; font-style:italic; font-size:16px; }
+.week-title { cursor:pointer; font-weight:bold; margin:10px 0; background:#eee; padding:8px 12px; border-radius:6px; font-size:16px; }
+.week-content { display:none; margin-left:10px; }
+.calendar-nav { display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; font-size:16px; }
+.calendar { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-top:4px; }
+.calendar-day { padding:8px; text-align:center; border-radius:6px; background:#f0f0f0; font-size:16px; cursor:pointer; transition:0.2s; }
+.calendar-day.has-entry { background:#FF6B6B; color:#fff; }
+.calendar-day.selected { border:2px solid #FF6B6B; }
 </style>
 </head>
 <body>
 
 <!-- 🧭 初期設定 -->
-<div id="onboarding" class="card">
+<div id="onboarding" class="card hidden">
   <h2>初期プロフィール設定</h2>
   <label>名前</label>
   <input id="name" placeholder="例: 山田 太郎">
-
   <label>性別</label>
   <select id="gender">
     <option value="">選択してください</option>
@@ -37,20 +56,16 @@ input, select, textarea { width:100%; padding:8px; margin:6px 0; border:1px soli
     <option value="女性">女性</option>
     <option value="その他">その他</option>
   </select>
-
   <label>年齢</label>
   <input id="age" type="number" min="0" placeholder="例: 25">
-
   <label>性格タイプ</label>
   <div class="chips">
     <span class="chip" data-val="追い込み型">追い込み型</span>
     <span class="chip" data-val="計画型">計画型</span>
     <span class="chip" data-val="マイペース型">マイペース型</span>
   </div>
-
   <label>目標</label>
   <input id="goalTitle" placeholder="例: 英会話・筋トレ・読書など">
-
   <button id="saveOnboard" class="primary">保存して次へ</button>
 </div>
 
@@ -81,7 +96,7 @@ input, select, textarea { width:100%; padding:8px; margin:6px 0; border:1px soli
   <h2>今日の一歩ジャーナル</h2>
   <div style="display:flex; gap:10px;">
     <textarea id="journalText" rows="4" placeholder="今日の感想・気づきを書きましょう" style="flex:1;"></textarea>
-    <div id="journalComment" style="flex:0 0 200px; border:1px solid #ccc;"></div>
+    <div id="journalComment" style="flex:0 0 220px; border:1px solid #ccc;"></div>
   </div>
   <button id="saveJournal" class="primary">保存</button>
 </div>
@@ -94,175 +109,248 @@ input, select, textarea { width:100%; padding:8px; margin:6px 0; border:1px soli
     <div class="tab" id="tabJournal">ジャーナル履歴</div>
   </div>
 
-  <!-- プロフィール情報 -->
   <div id="profileSection">
     <h3>プロフィール情報</h3>
     <div id="profileInfo"></div>
-    <button id="resetProfile" class="secondary">プロフィールをリセット</button>
+    <button id="resetProfile" class="secondary" style="margin-top:10px;">プロフィールリセット</button>
   </div>
 
-  <!-- 達成状況 -->
   <div id="progressSection" class="hidden">
-    <h3>達成状況</h3>
-    <ul id="historyList"></ul>
+    <h3>成長の記録 🌳</h3>
+    <div class="level-text" id="levelText"></div>
+    <div class="streak" id="streakDays">継続日数：0日</div>
+    <div style="text-align:center; margin-top:10px;">
+      <div class="tree" id="tree">🌱</div>
+    </div>
+    <div class="progress-bar" style="margin-top:10px;">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
   </div>
 
-  <!-- ジャーナル履歴 -->
   <div id="journalSection" class="hidden">
     <h3>過去のジャーナル</h3>
-    <ul id="journalList"></ul>
+    <div class="calendar-nav">
+      <button id="prevMonth">◀ 前月</button>
+      <span id="currentMonth"></span>
+      <button id="nextMonth">次月 ▶</button>
+    </div>
+    <div id="calendarContainer"></div>
+    <div id="journalList"></div>
   </div>
 </div>
 
 <script>
-let selectedMood = null;
-let selectedAchieve = null;
+// --- 共通変数 ---
+let selectedMood=null, selectedAchieve=null;
+const POINTS={ "やった":3, "ややできた":2, "できなかった":0 };
 
-// 🧩 チップ選択
+// --- チップ選択 ---
 document.querySelectorAll('.chip').forEach(c=>{
-  c.addEventListener('click', ()=>{
+  c.addEventListener('click',()=>{
     document.querySelectorAll('.chip').forEach(x=>x.classList.remove('selected'));
     c.classList.add('selected');
   });
 });
 
-// 🧩 保存ボタン（初期設定）
+// --- 初期設定保存 ---
 document.getElementById('saveOnboard').addEventListener('click',()=>{
-  const profile = {
-    name: document.getElementById('name').value,
-    gender: document.getElementById('gender').value,
-    age: document.getElementById('age').value,
-    personality: Array.from(document.querySelectorAll('.chip.selected')).map(c=>c.dataset.val)[0] || "",
-    goal: document.getElementById('goalTitle').value
+  const profile={
+    name:document.getElementById('name').value,
+    gender:document.getElementById('gender').value,
+    age:document.getElementById('age').value,
+    personality:Array.from(document.querySelectorAll('.chip.selected')).map(c=>c.dataset.val)[0]||"",
+    goal:document.getElementById('goalTitle').value
   };
-  if(!profile.name || !profile.goal){ alert("名前と目標は必須です"); return; }
-  localStorage.setItem('stepbit_profile', JSON.stringify(profile));
+  if(!profile.name||!profile.goal){alert("名前と目標は必須です");return;}
+  localStorage.setItem('stepbit_profile',JSON.stringify(profile));
+  if(!localStorage.getItem('stepbit_level')) localStorage.setItem('stepbit_level',JSON.stringify({level:1,exp:0}));
+  if(!localStorage.getItem('stepbit_streak')) localStorage.setItem('stepbit_streak',JSON.stringify({lastDate:null,days:0}));
+  if(!localStorage.getItem('stepbit_history')) localStorage.setItem('stepbit_history',JSON.stringify([]));
   document.getElementById('onboarding').classList.add('hidden');
   document.getElementById('moodSelect').classList.remove('hidden');
 });
 
-// 😌 気分選択
+// --- 気分選択 ---
 document.querySelectorAll('.mood-btn').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
+  btn.addEventListener('click',()=>{
     document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
-    selectedMood = parseInt(btn.dataset.level);
+    selectedMood=parseInt(btn.dataset.level);
   });
 });
-
 document.getElementById('confirmMood').addEventListener('click',()=>{
-  if(!selectedMood){ alert("気分を選択してください"); return; }
-  document.getElementById('challengeText').textContent = suggestChallenge();
+  if(!selectedMood){alert("気分を選択してください"); return;}
+  document.getElementById('challengeText').textContent=suggestChallenge();
   document.getElementById('moodSelect').classList.add('hidden');
   document.getElementById('challenge').classList.remove('hidden');
 });
 
-// 💡 チャレンジ提案
+// --- チャレンジ提案 ---
 function suggestChallenge(){
-  const p = JSON.parse(localStorage.getItem('stepbit_profile'));
-  const goal = p.goal || "目標";
-  const type = p.personality || "マイペース型";
-
-  if(selectedMood <= 2) return `今日は休息日。${goal}のことを考える時間にしよう。`;
+  const p=JSON.parse(localStorage.getItem('stepbit_profile')); 
+  const goal=p.goal||"目標"; 
+  const type=p.personality||"マイペース型";
+  if(selectedMood<=2) return `今日は休息日。${goal}のことを考える日にしよう。`;
   if(goal.includes("英会話")){
-    if(type==="追い込み型" && selectedMood>=4) return "英会話フレーズを10個練習してみよう！";
-    if(type==="計画型") return "英会話アプリで5分リスニング練習。";
-    return "英語日記を1文だけ書いてみよう！";
+    if(type==="追い込み型"&&selectedMood>=4)return"英会話フレーズを10個練習してみよう！";
+    if(type==="計画型")return"英会話アプリで5分リスニング練習。";
+    return"英語日記を1文だけ書いてみよう！";
   }
   if(goal.includes("筋トレ")){
-    if(selectedMood>=4) return "腕立て20回・スクワット30回に挑戦！";
-    if(selectedMood===3) return "ストレッチ＋軽いスクワット5回！";
-    return "深呼吸して体を休めよう。";
+    if(selectedMood>=4)return"腕立て20回・スクワット30回に挑戦！";
+    if(selectedMood===3)return"ストレッチ＋軽いスクワット5回！";
+    return"深呼吸して体を休めよう。";
   }
   if(goal.includes("読書")){
-    if(selectedMood>=4) return "本を10ページ読んで要約してみよう。";
-    return "1ページでもOK！継続が大事📖";
+    if(selectedMood>=4)return"本を10ページ読もう！";
+    return"1ページでもOK！継続が力📖";
   }
-  return `${goal}に向けて、少しでも前進してみよう！`;
+  return `${goal}に向けて一歩進もう！`;
 }
 
-// 💪 チャレンジ結果
+// --- チャレンジ結果 → ジャーナル ---
 ["btnDid","btnHalf","btnFail"].forEach(id=>{
   document.getElementById(id).addEventListener('click',()=>{
-    if(id==="btnDid") selectedAchieve="やった";
-    if(id==="btnHalf") selectedAchieve="ややできた";
-    if(id==="btnFail") selectedAchieve="できなかった";
-
-    const comment = document.getElementById('journalComment');
-    if(selectedAchieve==="やった"){ comment.textContent="最高！よく頑張ったね🎉"; comment.style.background="#28a745"; }
-    else if(selectedAchieve==="ややできた"){ comment.textContent="ナイスチャレンジ✨"; comment.style.background="#ffc107"; comment.style.color="#000"; }
-    else{ comment.textContent="大丈夫！明日また一歩💪"; comment.style.background="#dc3545"; }
-
+    selectedAchieve=id==="btnDid"?"やった":id==="btnHalf"?"ややできた":"できなかった";
+    const comment=document.getElementById('journalComment');
+    if(selectedAchieve==="やった"){comment.textContent="最高！よく頑張った🎉";comment.style.background="#28a745";}
+    else if(selectedAchieve==="ややできた"){comment.textContent="ナイスチャレンジ✨";comment.style.background="#ffc107";comment.style.color="#000";}
+    else{comment.textContent="大丈夫！明日また一歩💪";comment.style.background="#dc3545";}
     document.getElementById('challenge').classList.add('hidden');
     document.getElementById('journal').classList.remove('hidden');
   });
 });
 
-// ✏️ ジャーナル保存 → マイページへ
+// --- ジャーナル保存・進捗更新 ---
 document.getElementById('saveJournal').addEventListener('click',()=>{
-  const history = JSON.parse(localStorage.getItem('stepbit_history')||'[]');
-  const entry = {
-    date: new Date().toLocaleString(),
-    mood: selectedMood,
-    achieve: selectedAchieve,
-    text: document.getElementById('journalText').value
-  };
-  history.push(entry);
-  localStorage.setItem('stepbit_history', JSON.stringify(history));
+  const text=document.getElementById('journalText').value.trim();
+  if(!text){alert("コメントを入力してください"); return;}
+  const date=new Date().toISOString().split("T")[0];
+  let history=JSON.parse(localStorage.getItem('stepbit_history'));
+  history.push({date,comment:text,result:selectedAchieve});
+  localStorage.setItem('stepbit_history',JSON.stringify(history));
+
+  let levelData=JSON.parse(localStorage.getItem('stepbit_level'));
+  levelData.exp+=(POINTS[selectedAchieve]||0);
+  while(levelData.exp>=10){ levelData.level++; levelData.exp-=10; }
+  localStorage.setItem('stepbit_level',JSON.stringify(levelData));
+
+  let streak=JSON.parse(localStorage.getItem('stepbit_streak'));
+  const yesterday=new Date(new Date().setDate(new Date().getDate()-1)).toISOString().split("T")[0];
+  streak.days=(streak.lastDate===yesterday)?streak.days+1:1;
+  streak.lastDate=date;
+  localStorage.setItem('stepbit_streak',JSON.stringify(streak));
+
   document.getElementById('journal').classList.add('hidden');
-  showMyPage();
+  showMypage();
 });
 
-// 👤 マイページ表示
-function showMyPage(){
-  const data = JSON.parse(localStorage.getItem('stepbit_profile'));
-  const history = JSON.parse(localStorage.getItem('stepbit_history')||'[]');
-
-  document.getElementById('profileInfo').innerHTML = `
-    <p><strong>名前：</strong>${data.name}</p>
-    <p><strong>性別：</strong>${data.gender||"未設定"}</p>
-    <p><strong>年齢：</strong>${data.age||"未設定"}</p>
-    <p><strong>性格タイプ：</strong>${data.personality||"未設定"}</p>
-    <p><strong>目標：</strong>${data.goal}</p>
-  `;
-  document.getElementById('historyList').innerHTML = history.length===0 ? "<li>まだ履歴はありません。</li>" :
-    history.map(h=>`<li>${h.date}｜${h.achieve}</li>`).join("");
-
-  document.getElementById('journalList').innerHTML = history.length===0 ? "<li>まだジャーナルはありません。</li>" :
-    history.map(h=>`<li><strong>${h.date}</strong><br>気分:${h.mood}｜結果:${h.achieve}<br>${h.text}</li>`).join("");
-
+// --- マイページ表示 ---
+function showMypage(){
   document.getElementById('mypage').classList.remove('hidden');
+  const p=JSON.parse(localStorage.getItem('stepbit_profile'));
+  document.getElementById('profileInfo').innerHTML=
+    `<p><strong>名前:</strong> ${p.name}</p>
+     <p><strong>性別:</strong> ${p.gender}</p>
+     <p><strong>年齢:</strong> ${p.age}</p>
+     <p><strong>性格:</strong> ${p.personality}</p>
+     <p><strong>目標:</strong> ${p.goal}</p>`;
+
+  const lvl=JSON.parse(localStorage.getItem('stepbit_level'));
+  document.getElementById('levelText').textContent=`レベル ${lvl.level} (${lvl.exp}/10 EXP)`;
+  document.getElementById('progressFill').style.width=(lvl.exp*10)+'%';
+  const streak=JSON.parse(localStorage.getItem('stepbit_streak'));
+  document.getElementById('streakDays').textContent=`継続日数：${streak.days}日`;
+  const tree=document.getElementById('tree');
+  if(lvl.level<3) tree.textContent="🌱";
+  else if(lvl.level<5) tree.textContent="🌿";
+  else if(lvl.level<8) tree.textContent="🌳";
+  else tree.textContent="🌴";
+
+  renderCalendar();
+  renderJournalHistory(JSON.parse(localStorage.getItem('stepbit_history')));
 }
 
-// 🔁 リセット
+// --- カレンダー ---
+let calYear, calMonth;
+function setCalendarToToday(){ 
+  const today=new Date();
+  calYear=today.getFullYear(); calMonth=today.getMonth();
+}
+
+// --- カレンダー描画 ---
+function renderCalendar(){
+  const container=document.getElementById('calendarContainer');
+  const history=JSON.parse(localStorage.getItem('stepbit_history')) || [];
+  container.innerHTML="";
+  const firstDay=new Date(calYear, calMonth,1).getDay();
+  const daysInMonth=new Date(calYear, calMonth+1,0).getDate();
+  document.getElementById('currentMonth').textContent=`${calYear}年 ${calMonth+1}月`;
+
+  const cal=document.createElement('div'); cal.className='calendar';
+  for(let i=0;i<firstDay;i++){ cal.appendChild(document.createElement('div')); }
+  for(let d=1; d<=daysInMonth; d++){
+    const dayDiv=document.createElement('div');
+    dayDiv.className='calendar-day';
+    const dateStr=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    if(history.find(h=>h.date===dateStr)) dayDiv.classList.add('has-entry');
+    dayDiv.textContent=d;
+    cal.appendChild(dayDiv);
+  }
+  container.appendChild(cal);
+}
+
+// --- ジャーナル履歴描画 ---
+function renderJournalHistory(history){
+  const container=document.getElementById('journalList');
+  if(!history.length){ container.innerHTML='<p class="empty-journal">ジャーナルがまだありません</p>'; return;}
+  container.innerHTML='';
+  history.slice().reverse().forEach(j=>{
+    const div=document.createElement('div');
+    div.className='journal-card';
+    div.dataset.type=j.result;
+    div.innerHTML=`<strong>${j.date} - ${j.result}</strong><p>${j.comment}</p>`;
+    container.appendChild(div);
+  });
+}
+
+// --- タブ切替 ---
+document.getElementById('tabProfile').addEventListener('click',()=>{showTab('profile');});
+document.getElementById('tabProgress').addEventListener('click',()=>{showTab('progress');});
+document.getElementById('tabJournal').addEventListener('click',()=>{showTab('journal');});
+function showTab(tab){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('#profileSection,#progressSection,#journalSection').forEach(s=>s.classList.add('hidden'));
+  if(tab==='profile'){document.getElementById('tabProfile').classList.add('active'); document.getElementById('profileSection').classList.remove('hidden');}
+  if(tab==='progress'){document.getElementById('tabProgress').classList.add('active'); document.getElementById('progressSection').classList.remove('hidden');}
+  if(tab==='journal'){document.getElementById('tabJournal').classList.add('active'); document.getElementById('journalSection').classList.remove('hidden');}
+}
+
+// --- プロフィールリセット ---
 document.getElementById('resetProfile').addEventListener('click',()=>{
-  if(confirm("プロフィールをリセットして最初からやり直しますか？")){
-    localStorage.clear();
-    document.getElementById('mypage').classList.add('hidden');
+  if(confirm("本当にリセットしますか？全データが消えます")) localStorage.clear(); location.reload();
+});
+
+// --- 初期化 ---
+window.addEventListener('DOMContentLoaded',()=>{
+  setCalendarToToday();
+  if(localStorage.getItem('stepbit_profile')){
+    document.getElementById('moodSelect').classList.remove('hidden');
+  } else{
     document.getElementById('onboarding').classList.remove('hidden');
   }
 });
 
-// 🗂️ タブ切り替え
-const tabs = ["Profile","Progress","Journal"];
-tabs.forEach(t=>{
-  document.getElementById("tab"+t).addEventListener('click',()=>{
-    tabs.forEach(x=>{
-      document.getElementById("tab"+x).classList.remove('active');
-      document.getElementById(x.toLowerCase()+"Section").classList.add('hidden');
-    });
-    document.getElementById("tab"+t).classList.add('active');
-    document.getElementById(t.toLowerCase()+"Section").classList.remove('hidden');
-  });
+// --- 月移動 ---
+document.getElementById('prevMonth').addEventListener('click',()=>{
+  calMonth--; if(calMonth<0){ calMonth=11; calYear--; }
+  renderCalendar();
 });
-
-// 🚀 起動時
-window.onload = ()=>{
-  if(localStorage.getItem('stepbit_profile')){
-    document.getElementById('onboarding').classList.add('hidden');
-    document.getElementById('moodSelect').classList.remove('hidden');
-  }
-};
+document.getElementById('nextMonth').addEventListener('click',()=>{
+  calMonth++; if(calMonth>11){ calMonth=0; calYear++; }
+  renderCalendar();
+});
 </script>
+
 </body>
 </html>
