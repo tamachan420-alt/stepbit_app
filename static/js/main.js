@@ -46,3 +46,37 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('aiBtn')?.addEventListener('click', askAI);
   loadChallenges();
 });
+
+// === 🎯 今日のチャレンジをAIにお願いする関数 ===
+async function getSuggestion() {
+  const res = await fetch("/api/suggest", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: "たま",
+      goal: "笑顔で過ごす",
+      mood: "やる気が出ない"
+    })
+  });
+  const data = await res.json();
+  console.log("AIの提案：", data.suggestion);
+  return data.suggestion;
+}
+
+// === 💬 実施結果のコメントをAIにもらう関数 ===
+async function getComment() {
+  const res = await fetch("/api/comment", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: "たま",
+      goal: "笑顔で過ごす",
+      result: "できた",   // ← ここは後でUIから変えられるようにする
+      dialect: "imabari"  // ← .envの設定に合わせてもOK
+    })
+  });
+  const data = await res.json();
+  console.log("AIのコメント：", data.comment);
+  return data.comment;
+}
+
