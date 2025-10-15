@@ -9,6 +9,7 @@
 ## 🌼 はじめに（小6でもわかる！）
 
 ### 🧭 このフォルダの中身
+'''
 stepbit_app/
 ├── .env.example ← これをコピーして .env を作る
 ├── requirements.txt ← 必要な道具のリスト
@@ -22,7 +23,7 @@ stepbit_app/
 │ └── db/ ← データベース本体ができる場所
 ├── templates/stepbit.html ← 画面（あなたのHTMLをここに入れる）
 └── static/js/main.js ← 画面とAPIをつなぐ橋
-
+'''
 ---
 
 ## 🪄 1. 準備（1回だけでOK）
