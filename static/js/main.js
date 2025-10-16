@@ -46,3 +46,76 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('aiBtn')?.addEventListener('click', askAI);
   loadChallenges();
 });
+
+// === 🎯 今日のチャレンジをAIにお願いする関数 ===
+async function getSuggestion() {
+  const res = await fetch("/api/suggest", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: "たま",
+      goal: "笑顔で過ごす",
+      mood: "やる気が出ない"
+    })
+  });
+  const data = await res.json();
+  console.log("AIの提案：", data.suggestion);
+  return data.suggestion;
+}
+
+// === 💬 実施結果のコメントをAIにもらう関数 ===
+async function getComment() {
+  const res = await fetch("/api/comment", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: "たま",
+      goal: "笑顔で過ごす",
+      result: "できた",   // ← ここは後でUIから変えられるようにする
+      dialect: "imabari"  // ← .envの設定に合わせてもOK
+    })
+  });
+  const data = await res.json();
+  console.log("AIのコメント：", data.comment);
+  return data.comment;
+}
+
+// AIとの通信を一本化
+async function fetchAIResponse(type, payload) {
+  try {
+    const res = await fetch(`/api/${type}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+
+    if (!data.ok) throw new Error(data.error || "AIリクエスト失敗");
+
+    // 結果を返す（必要に応じてUI更新を呼ぶ）
+    return data.text;
+
+  } catch (err) {
+    console.error("AI呼び出しエラー:", err);
+    return "AIとの通信でエラーが発生しました。";
+  }
+}
+
+// ==========================
+// 提案フェーズでの利用例
+// ==========================
+async function handleSuggestClick() {
+  const userInput = document.querySelector("#moodInput").value;
+  const suggestions = await fetchAIResponse("suggest", { mood: userInput });
+  document.querySelector("#suggestOutput").textContent = suggestions;
+}
+
+// ==========================
+// コメントフェーズでの利用例
+// ==========================
+async function handleCommentClick() {
+  const resultText = document.querySelector("#resultInput").value;
+  const feedback = await fetchAIResponse("comment", { done: resultText });
+  document.querySelector("#commentOutput").textContent = feedback;
+}
+

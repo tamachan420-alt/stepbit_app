@@ -178,9 +178,45 @@ document.querySelectorAll('.mood-btn').forEach(btn=>{
     selectedMood=parseInt(btn.dataset.level);
   });
 });
-document.getElementById('confirmMood').addEventListener('click',()=>{
-  if(!selectedMood){alert("気分を選択してください"); return;}
-  document.getElementById('challengeText').textContent=suggestChallenge();
+document.getElementById('confirmMood').addEventListener('click', async ()=>{
+  if(!selectedMood){ alert("気分を選択してください"); return; }
+
+  const p = JSON.parse(localStorage.getItem('stepbit_profile'));
+  const payload = {
+    name: p.name,
+    gender: p.gender,
+    age: p.age,
+    type: p.personality,   // personality → type に合わせる
+    goal: p.goal,
+    mood: selectedMood
+  };
+
+  // 💡 AIから今日のチャレンジ提案を取得
+  document.getElementById('challengeText').textContent = "AIが考え中...";
+  const aiText = await fetchAIResponse("suggest", payload);
+  document.getElementById('challengeText').textContent = aiText;
+
+  document.getElementById('moodSelect').classList.add('hidden');
+  document.getElementById('challenge').classList.remove('hidden');
+});
+document.getElementById('confirmMood').addEventListener('click', async ()=>{
+  if(!selectedMood){ alert("気分を選択してください"); return; }
+
+  const p = JSON.parse(localStorage.getItem('stepbit_profile'));
+  const payload = {
+    name: p.name,
+    gender: p.gender,
+    age: p.age,
+    type: p.personality,   // personality → type に合わせる
+    goal: p.goal,
+    mood: selectedMood
+  };
+
+  // 💡 AIから今日のチャレンジ提案を取得
+  document.getElementById('challengeText').textContent = "AIが考え中...";
+  const aiText = await fetchAIResponse("suggest", payload);
+  document.getElementById('challengeText').textContent = aiText;
+
   document.getElementById('moodSelect').classList.add('hidden');
   document.getElementById('challenge').classList.remove('hidden');
 });
@@ -210,40 +246,73 @@ function suggestChallenge(){
 
 // --- チャレンジ結果 → ジャーナル ---
 ["btnDid","btnHalf","btnFail"].forEach(id=>{
-  document.getElementById(id).addEventListener('click',()=>{
-    selectedAchieve=id==="btnDid"?"やった":id==="btnHalf"?"ややできた":"できなかった";
-    const comment=document.getElementById('journalComment');
-    if(selectedAchieve==="やった"){comment.textContent="最高！よく頑張った🎉";comment.style.background="#28a745";}
-    else if(selectedAchieve==="ややできた"){comment.textContent="ナイスチャレンジ✨";comment.style.background="#ffc107";comment.style.color="#000";}
-    else{comment.textContent="大丈夫！明日また一歩💪";comment.style.background="#dc3545";}
+  document.getElementById(id).addEventListener('click', async ()=>{
+    selectedAchieve = id==="btnDid" ? "やった" :
+                      id==="btnHalf" ? "ややできた" : "できなかった";
+
+    const challengeText = document.getElementById('challengeText').textContent;
+    const commentBox = document.getElementById('journalComment');
+    commentBox.textContent = "AIがコメントを考え中...";
+    commentBox.style.background = "#ccc";
+    commentBox.style.color = "#000";
+
+    // 💬 AIにコメントをリクエスト
+    const profile = JSON.parse(localStorage.getItem('stepbit_profile'));
+    const payload = {
+      name: profile.name,
+      gender: profile.gender,
+      age: profile.age,
+      type: profile.personality,
+      goal: profile.goal,
+      mood: selectedMood,
+      result: selectedAchieve
+};
+
+    const aiComment = await fetchAIResponse("comment", payload);
+
+    // AIコメントを表示
+    commentBox.textContent = aiComment;
+    commentBox.style.background = "#FFD54F";
+    commentBox.style.color = "#000";
+
     document.getElementById('challenge').classList.add('hidden');
     document.getElementById('journal').classList.remove('hidden');
   });
 });
 
+
 // --- ジャーナル保存・進捗更新 ---
-document.getElementById('saveJournal').addEventListener('click',()=>{
-  const text=document.getElementById('journalText').value.trim();
-  if(!text){alert("コメントを入力してください"); return;}
-  const date=new Date().toISOString().split("T")[0];
-  let history=JSON.parse(localStorage.getItem('stepbit_history'));
-  history.push({date,comment:text,result:selectedAchieve});
-  localStorage.setItem('stepbit_history',JSON.stringify(history));
+document.getElementById('saveJournal').addEventListener('click', (e) => {
+  e.preventDefault();
+  const text = document.getElementById('journalText').value.trim();
+  if (!text) { alert("コメントを入力してください"); return; }
 
-  let levelData=JSON.parse(localStorage.getItem('stepbit_level'));
-  levelData.exp+=(POINTS[selectedAchieve]||0);
-  while(levelData.exp>=10){ levelData.level++; levelData.exp-=10; }
-  localStorage.setItem('stepbit_level',JSON.stringify(levelData));
+  const date = new Date().toISOString().split("T")[0];
+  let history = JSON.parse(localStorage.getItem('stepbit_history')) || [];
+  history.push({ date, comment: text, result: selectedAchieve });
+  localStorage.setItem('stepbit_history', JSON.stringify(history));
 
-  let streak=JSON.parse(localStorage.getItem('stepbit_streak'));
-  const yesterday=new Date(new Date().setDate(new Date().getDate()-1)).toISOString().split("T")[0];
-  streak.days=(streak.lastDate===yesterday)?streak.days+1:1;
-  streak.lastDate=date;
-  localStorage.setItem('stepbit_streak',JSON.stringify(streak));
+  // 🔹ここを安全化（nullでも初期値を設定）
+  let levelData = JSON.parse(localStorage.getItem('stepbit_level'));
+  if (!levelData) levelData = { level: 1, exp: 0 };
+  levelData.exp += (POINTS[selectedAchieve] || 0);
+  while (levelData.exp >= 10) {
+    levelData.level++;
+    levelData.exp -= 10;
+  }
+  localStorage.setItem('stepbit_level', JSON.stringify(levelData));
+
+  // streak も安全化
+  let streak = JSON.parse(localStorage.getItem('stepbit_streak')) || { lastDate: null, days: 0 };
+  const yesterday = new Date(new Date().setDate(new Date().getDate() - 1)).toISOString().split("T")[0];
+  streak.days = (streak.lastDate === yesterday) ? streak.days + 1 : 1;
+  streak.lastDate = date;
+  localStorage.setItem('stepbit_streak', JSON.stringify(streak));
 
   document.getElementById('journal').classList.add('hidden');
   showMypage();
 });
+
 
 // --- マイページ表示 ---
 function showMypage(){
@@ -351,6 +420,37 @@ document.getElementById('nextMonth').addEventListener('click',()=>{
   renderCalendar();
 });
 </script>
+<script>
+// --- 共通AI通信関数 ---
+async function fetchAIResponse(type, payload) {
+  try {
+    const res = await fetch(`/api/${type}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
 
+    const data = await res.json();
+    // ✅ Flask 側のフォーマットに合わせて判定
+    if (data.ok && data.text) {
+      return data.text;
+    } else if (data.suggestion) {
+      // 旧形式のAPI（/api/suggest が suggestion を返す場合）にも対応
+      return data.suggestion;
+    } else if (data.comment) {
+      // 旧形式のAPI（/api/comment が comment を返す場合）にも対応
+      return data.comment;
+    } else {
+      console.warn("AI応答フォーマットが想定外:", data);
+      return suggestChallenge(); // フォールバック
+    }
+  } catch (err) {
+    console.error("AI通信エラー:", err);
+    return suggestChallenge(); // ネット切断やサーバー停止時のフォールバック
+  }
+}
+</script>
+
+<script src="/static/js/main.js"></script>
 </body>
 </html>

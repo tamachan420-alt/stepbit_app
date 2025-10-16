@@ -43,9 +43,10 @@ def suggest():
 
         # ✅ jsonify → Response(json.dumps(..., ensure_ascii=False)) に変更
         return Response(
-            json.dumps({"suggestion": suggestion}, ensure_ascii=False),
+            json.dumps({"ok": True, "text": suggestion}, ensure_ascii=False),
             mimetype='application/json'
         )
+
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
