@@ -13,8 +13,17 @@ from dotenv import load_dotenv
 # ✅ backend の1階層上の .env を明示的に読み込む
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
+# ✅ プロジェクトのルートパスを取得
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+
 def create_app():
-    app = Flask(__name__, template_folder='../templates', static_folder='../static')
+    # ✅ static と templates をプロジェクト直下に正しく指定
+    app = Flask(
+        __name__,
+        template_folder=os.path.join(BASE_DIR, "templates"),
+        static_folder=os.path.join(BASE_DIR, "static")
+    )
+
     app.config.from_object(Config)
     db.init_app(app)
 
@@ -40,7 +49,7 @@ def create_app():
     return app
 
 
-# ✅ ★ここに追記！ create_app() の後、if __name__ == '__main__' の前
+# ✅ Flaskアプリ起動設定
 app = create_app()
 
 with app.app_context():
@@ -48,6 +57,6 @@ with app.app_context():
     db.create_all()
     print("✅ データベース初期化チェック完了")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print("🔑 OpenAI API KEY (masked):", str(app.config["OPENAI_API_KEY"])[:10] + "******")
     app.run(debug=True)
